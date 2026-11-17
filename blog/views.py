@@ -6,8 +6,13 @@ from django.views.generic import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render
-from .models import Post, Comment
+from .models import Post, Comment, Category
 from .forms import PostForm, CommentForm
+
+class CategoryListView(ListView):
+    model = Category
+    context_object_name = 'categories'
+    template_name = 'blog/category_list.html'
 
 
 class PostListView(ListView):
@@ -39,18 +44,6 @@ class PostDeleteView(DeleteView):
     template_name = 'blog/post_confirm_delete.html'
     success_url = reverse_lazy('post_list')
 
-
-# Aliases para manter o urls.py igual nas 3 versões
-post_list = PostListView.as_view()
-post_detail = PostDetailView.as_view()
-post_create = PostCreateView.as_view()
-post_update = PostUpdateView.as_view()
-post_delete = PostDeleteView.as_view()
-
-def home(request):
-    posts = Post.objects.all()[:5]    # só os 5 mais recentes, por exemplo
-    return render(request, 'blog/home.html', {'posts': posts})
-
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
@@ -73,5 +66,22 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse('post_detail', args=[self.post_obj.pk])
 
-
+# Aliases para manter o urls.py igual nas 3 versões
+post_list = PostListView.as_view()
+post_detail = PostDetailView.as_view()
+post_create = PostCreateView.as_view()
+post_update = PostUpdateView.as_view()
+post_delete = PostDeleteView.as_view()
 comment_create = CommentCreateView.as_view()
+category_list = CategoryListView.as_view()
+
+def home(request):
+    posts = Post.objects.all()[:5]    # só os 5 mais recentes, por exemplo
+    return render(request, 'blog/home.html', {'posts': posts})
+
+def category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)   # 404 se não existir
+    return render(request, 'blog/post_list.html', {
+        'posts': category.posts.all(),
+        'category': category,
+    })

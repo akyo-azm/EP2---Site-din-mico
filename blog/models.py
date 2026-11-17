@@ -3,11 +3,24 @@ from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
 
+class Category(models.Model):
+    name = models.CharField('Nome', max_length=100)
+    description = models.TextField('Descrição')
+
+    class Meta:
+        verbose_name_plural = 'categories'
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('category_detail', args=[self.pk])
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()  # armazenado como HTML (renderizar com |safe)
     posted_at = models.DateTimeField(default=timezone.now)
+    categories = models.ManyToManyField(Category, related_name='posts', blank=True)
 
     class Meta:
         ordering = ['-posted_at']
