@@ -1,8 +1,7 @@
-# VERSÃO 2: views funcionais utilizando um Django form (blog/forms.py)
-# Copie este arquivo para blog/views.py no segundo commit
+# VERSÃO 1: views funcionais, sem Django forms e sem validação
+# Copie este arquivo para blog/views.py no primeiro commit
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post
-from .forms import PostForm
 
 
 def post_list(request):
@@ -11,36 +10,33 @@ def post_list(request):
 
 
 def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post, pk=pk)  # 404 se não existir
     return render(request, 'blog/post_detail.html', {'post': post})
 
 
 def post_create(request):
     if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save()
-            return redirect('post_detail', pk=post.pk)
-    else:
-        form = PostForm()
-    return render(request, 'blog/post_form.html', {'form': form})
+        post = Post.objects.create(
+            title=request.POST['title'],
+            content=request.POST['content'],
+        )
+        return redirect('post_detail', pk=post.pk)
+    return render(request, 'blog/post_form.html')
 
 
 def post_update(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            form.save()
-            return redirect('post_detail', pk=post.pk)
-    else:
-        form = PostForm(instance=post)
-    return render(request, 'blog/post_form.html', {'form': form, 'post': post})
+        post.title = request.POST['title']
+        post.content = request.POST['content']
+        post.save()
+        return redirect('post_detail', pk=post.pk)
+    return render(request, 'blog/post_form.html', {'post': post})
 
 
 def post_delete(request, pk):
     post = get_object_or_404(Post, pk=pk)
-    if request.method == 'POST':
+    if request.method == 'POST':  # confirmação enviada
         post.delete()
         return redirect('post_list')
     return render(request, 'blog/post_confirm_delete.html', {'post': post})
