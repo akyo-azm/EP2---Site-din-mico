@@ -12,7 +12,7 @@
                 <small>{{ post.posted_at|date:"d/m/Y H:i" }}</small>
             </li>
         {% empty %}
-            <li>{# TODO: mensagem sem posts #}</li>
+            <li>Sem posts</li>
         {% endfor %}
     </ul>
 {% endblock %}
