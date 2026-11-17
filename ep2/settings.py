@@ -36,7 +36,15 @@ SECRET_KEY = 'django-insecure-srg7dmbb^y+)-1bs5gek$-064l*9ix*+h$)n=xajb)4pzwaonn
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'ep2-blog-akyo.onrender.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://ep2-blog-akyo.onrender.com',
+]
 
 
 # Application definition
