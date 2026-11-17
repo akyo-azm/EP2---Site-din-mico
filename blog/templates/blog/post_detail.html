@@ -14,4 +14,19 @@
         <a href="{% url 'post_delete' post.pk %}" class="btn">Remover</a>
         <a href="{% url 'post_list' %}" class="btn">Voltar</a>
     </p>
+
+    <section>
+    <h3>Comentários</h3>
+    <a href="{% url 'comment_create' post.pk %}" class="btn btn-comment">Comentar</a>
+
+    {% for comment in post.comments.all %}
+        <div>
+            <strong>{{ comment.author }}</strong>
+            <small>{{ comment.posted_at|date:"d/m/Y H:i" }}</small>
+            <p>{{ comment.text }}</p>
+        </div>
+    {% empty %}
+        <p>Nenhum comentário ainda.</p>
+    {% endfor %}
+</section>
 {% endblock %}

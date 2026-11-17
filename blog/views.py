@@ -1,11 +1,13 @@
 # VERSÃO 3: classes genéricas (ListView, DetailView, CreateView, UpdateView, DeleteView)
 # Copie este arquivo para blog/views.py no terceiro commit
-from django.urls import reverse_lazy, render
+from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView,
 )
-from .models import Post
-from .forms import PostForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, render
+from .models import Post, Comment
+from .forms import PostForm, CommentForm
 
 
 class PostListView(ListView):
@@ -48,3 +50,28 @@ post_delete = PostDeleteView.as_view()
 def home(request):
     posts = Post.objects.all()[:5]    # só os 5 mais recentes, por exemplo
     return render(request, 'blog/home.html', {'posts': posts})
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.post_obj = get_object_or_404(Post, pk=kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['post'] = self.post_obj
+        return context
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = self.post_obj
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('post_detail', args=[self.post_obj.pk])
+
+
+comment_create = CommentCreateView.as_view()
